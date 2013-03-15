@@ -16,12 +16,14 @@ module Grocer
 
     def continually_check_for_responses(connection)
       Thread.new do
-        check_for_responses(connection) while connection
+        loop do
+          check_for_responses(connection)
+        end
       end
     end
 
     def check_for_responses(connection)
-      binary_tuple = connection.read(ErrorResponse::LENGTH)
+      binary_tuple = connection.read
       error_response = ErrorResponse.new(binary_tuple)
       handler.call(error_response)
     end

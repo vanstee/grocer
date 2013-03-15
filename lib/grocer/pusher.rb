@@ -9,7 +9,7 @@ module Grocer
     end
 
     def error_response_handler(&block)
-      @connection.error_response_handler(block)
+      @connection.error_response_handler(&block)
     end
   end
 end

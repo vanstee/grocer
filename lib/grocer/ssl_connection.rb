@@ -39,6 +39,7 @@ module Grocer
 
       @sock            = TCPSocket.new(gateway, port)
       @sock.setsockopt   Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true
+      @sock.setsockopt   Socket::IPPROTO_TCP, Socket::TCP_NODELAY, true
       @ssl             = OpenSSL::SSL::SSLSocket.new(@sock, context)
       @ssl.sync        = true
       @ssl.connect

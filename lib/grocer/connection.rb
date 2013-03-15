@@ -27,7 +27,11 @@ module Grocer
 
     def connect
       ssl.connect unless ssl.connected?
-      checker.continually_check_for_responses if checker
+    end
+
+    def error_response_handler(&block)
+      @checker = ErrorResponseChecker.new(block)
+      continually_check_for_responses
     end
 
     private
@@ -45,33 +49,13 @@ module Grocer
 
     def destroy_connection
       return unless @ssl_connection
-
-      @ssl_connection.disconnect rescue nil
+      @ssl_connection.disconnect
       @ssl_connection = nil
     end
 
     def with_connection
-      attempts = 1
-      begin
-        connect
-        yield
-      rescue => e
-        if e.class == OpenSSL::SSL::SSLError && e.message =~ /certificate expired/i
-          e.extend(CertificateExpiredError)
-          raise
-        end
-
-        raise unless attempts < retries
-
-        destroy_connection
-        attempts += 1
-        retry
-      end
-    end
-
-    def error_response_handler(&block)
-      @checker = ErrorResponseChecker.new(block)
-      continually_check_for_responses
+      connect
+      yield
     end
 
     def continually_check_for_responses
