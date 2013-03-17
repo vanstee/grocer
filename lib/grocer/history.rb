@@ -2,15 +2,23 @@ require 'thread'
 
 module Grocer
   class History
-    attr_reader :history, :lock
+    DEFAULT_SIZE = 100
 
-    def initialize
+    attr_reader :history, :lock, :size
+
+    def initialize(options = {})
       @history = []
       @lock = Mutex.new
+      @size = options.fetch(:size, DEFAULT_SIZE)
     end
 
     def push(*elements)
       synchronize do
+        if queue.size + elements.size > size
+          extra = queue.size + elements.size - size
+          elements.shift(extra)
+        end
+
         queue.push(*elements)
       end
     end
