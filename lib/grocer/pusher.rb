@@ -5,7 +5,7 @@ module Grocer
     end
 
     def push(notification)
-      @connection.queue.push(notification)
+      @connection.enqueue(notification)
     end
 
     def error_response_handler(&block)

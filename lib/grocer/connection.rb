@@ -1,11 +1,12 @@
 require 'grocer'
-require 'grocer/ssl_connection'
+require 'grocer/history'
 require 'grocer/queue'
+require 'grocer/ssl_connection'
 
 module Grocer
   class Connection
-    attr_reader :certificate, :checker, :gateway, :passphrase, :port, :queue,
-      :retries
+    attr_reader :certificate, :checker, :gateway, :history, :passphrase, :port,
+      :queue, :retries
 
     def initialize(options = {})
       @certificate = options.fetch(:certificate) { nil }
@@ -14,6 +15,7 @@ module Grocer
       @port = options.fetch(:port) { fail NoPortError }
       @retries = options.fetch(:retries) { 3 }
       @queue = Queue.new
+      @history = History.new
 
       wait_for_notifications
     end
@@ -29,6 +31,11 @@ module Grocer
           write(notification.to_bytes)
         end
       end
+    end
+
+    def rewind_to(identifier)
+      notifications = history.pop_notifications_since(identifier)
+      queue.push(*notifications)
     end
 
     def read(size = nil, buf = nil)

@@ -9,7 +9,7 @@ module Grocer
   class ErrorResponseChecker
     attr_accessor :handler, :thread
 
-    def initialize(handler)
+    def initialize(handler = nil)
       raise InvalidErrorResponseHandler unless handler.arity == 1
       @handler = handler
     end
@@ -25,6 +25,7 @@ module Grocer
     def check_for_responses(connection)
       binary_tuple = connection.read
       error_response = ErrorResponse.new(binary_tuple)
+      connection.rewind_to(error_response.identifier)
       handler.call(error_response)
     end
   end
