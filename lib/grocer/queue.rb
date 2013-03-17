@@ -7,7 +7,7 @@ module Grocer
     def initialize
       @queue = []
       @lock = Mutex.new
-      @condition = Condition.new
+      @condition = ConditionVariable.new
     end
 
     def pop
